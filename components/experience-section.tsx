@@ -158,7 +158,6 @@ export default function ExperienceSection() {
     },
   };
 
-  if (!coords) return null; // or a loading placeholder
 
   return (
     <section id="experience" className="py-20 px-4 relative overflow-hidden">
