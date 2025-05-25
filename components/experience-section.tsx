@@ -1,10 +1,18 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { useInView } from "framer-motion"
-import { useRef, useState } from "react"
-import { Calendar, MapPin, TrendingUp, Building, Users, Code, Award } from "lucide-react"
-import WorkplaceBot from "./workplace-bot"
+import { motion } from "framer-motion";
+import { useInView } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import {
+  Calendar,
+  MapPin,
+  TrendingUp,
+  Building,
+  Users,
+  Code,
+  Award,
+} from "lucide-react";
+import WorkplaceBot from "./workplace-bot";
 
 const experiences = [
   {
@@ -95,13 +103,25 @@ const experiences = [
       },
     ],
   },
-]
+];
 
 export default function ExperienceSection() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
-  const [selectedExperience, setSelectedExperience] = useState(0)
-  const [hoveredAchievement, setHoveredAchievement] = useState<number | null>(null)
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [selectedExperience, setSelectedExperience] = useState(0);
+  const [hoveredAchievement, setHoveredAchievement] = useState<number | null>(
+    null
+  );
+  const [coords, setCoords] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    setCoords({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+    });
+  }, []);
+
+  if (!coords) return null;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -111,7 +131,7 @@ export default function ExperienceSection() {
         staggerChildren: 0.3,
       },
     },
-  }
+  };
 
   const itemVariants = {
     hidden: { x: -50, opacity: 0 },
@@ -123,7 +143,7 @@ export default function ExperienceSection() {
         ease: "easeOut",
       },
     },
-  }
+  };
 
   const achievementVariants = {
     hidden: { scale: 0, opacity: 0 },
@@ -136,7 +156,9 @@ export default function ExperienceSection() {
         damping: 15,
       },
     },
-  }
+  };
+
+  if (!coords) return null; // or a loading placeholder
 
   return (
     <section id="experience" className="py-20 px-4 relative overflow-hidden">
@@ -150,8 +172,8 @@ export default function ExperienceSection() {
             key={i}
             className="absolute text-cyan-400/10 font-mono text-sm"
             initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * coords.x,
+              y: Math.random() * coords.y,
               opacity: 0,
             }}
             animate={{
@@ -164,7 +186,11 @@ export default function ExperienceSection() {
               delay: Math.random() * 5,
             }}
           >
-            {["</>", "{}", "[]", "()", "fn()", "API", "DB", "UI"][Math.floor(Math.random() * 8)]}
+            {
+              ["</>", "{}", "[]", "()", "fn()", "API", "DB", "UI"][
+                Math.floor(Math.random() * 8)
+              ]
+            }
           </motion.div>
         ))}
       </div>
@@ -184,20 +210,27 @@ export default function ExperienceSection() {
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-purple-500 mx-auto mb-6"></div>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            My career progression in full-stack development with measurable impact and continuous growth
+            My career progression in full-stack development with measurable
+            impact and continuous growth
           </p>
         </motion.div>
 
         <div className="grid lg:grid-cols-3 gap-8 items-start">
           {/* Workplace Bot */}
-          <motion.div variants={itemVariants} className="lg:col-span-1 order-2 lg:order-1">
+          <motion.div
+            variants={itemVariants}
+            className="lg:col-span-1 order-2 lg:order-1"
+          >
             <div className="lg:sticky lg:top-24">
               <WorkplaceBot selectedExperience={selectedExperience} />
             </div>
           </motion.div>
 
           {/* Experience Timeline */}
-          <motion.div variants={itemVariants} className="lg:col-span-2 order-1 lg:order-2">
+          <motion.div
+            variants={itemVariants}
+            className="lg:col-span-2 order-1 lg:order-2"
+          >
             <div className="relative">
               {/* Timeline line */}
               <div className="absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-400 via-purple-500 to-pink-500 rounded-full"></div>
@@ -221,13 +254,17 @@ export default function ExperienceSection() {
                     <motion.div
                       whileHover={{ scale: 1.02, x: 10 }}
                       className={`bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 hover:border-cyan-400/50 transition-all duration-300 ${
-                        selectedExperience === index ? "border-cyan-400/50 shadow-lg shadow-cyan-400/20" : ""
+                        selectedExperience === index
+                          ? "border-cyan-400/50 shadow-lg shadow-cyan-400/20"
+                          : ""
                       }`}
                     >
                       {/* Header */}
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
                         <div>
-                          <h3 className="text-2xl font-bold text-white mb-2">{exp.title}</h3>
+                          <h3 className="text-2xl font-bold text-white mb-2">
+                            {exp.title}
+                          </h3>
                           <h4
                             className={`text-xl font-semibold bg-gradient-to-r ${exp.companyColor} bg-clip-text text-transparent`}
                           >
@@ -278,7 +315,8 @@ export default function ExperienceSection() {
                                 <motion.div
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{
-                                    opacity: hoveredAchievement === achIndex ? 1 : 0,
+                                    opacity:
+                                      hoveredAchievement === achIndex ? 1 : 0,
                                     y: hoveredAchievement === achIndex ? 0 : 10,
                                   }}
                                   className={`mt-2 text-sm font-semibold ${achievement.color}`}
@@ -308,15 +346,25 @@ export default function ExperienceSection() {
                             >
                               {exp.achievements.length}
                             </div>
-                            <div className="text-xs text-gray-400">Key Achievements</div>
+                            <div className="text-xs text-gray-400">
+                              Key Achievements
+                            </div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-green-400">{index === 0 ? "20%" : "100%"}</div>
-                            <div className="text-xs text-gray-400">Performance Impact</div>
+                            <div className="text-2xl font-bold text-green-400">
+                              {index === 0 ? "20%" : "100%"}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              Performance Impact
+                            </div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-400">{index === 0 ? "7+" : "4+"}</div>
-                            <div className="text-xs text-gray-400">Technologies Used</div>
+                            <div className="text-2xl font-bold text-blue-400">
+                              {index === 0 ? "7+" : "4+"}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              Technologies Used
+                            </div>
                           </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold text-purple-400">
@@ -335,5 +383,5 @@ export default function ExperienceSection() {
         </div>
       </motion.div>
     </section>
-  )
+  );
 }
