@@ -1,8 +1,4 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Calendar,
   MapPin,
@@ -12,7 +8,21 @@ import {
   Code,
   Award,
 } from "lucide-react";
-import WorkplaceBot from "./workplace-bot";
+
+// Mock WorkplaceBot component since it's not available
+const WorkplaceBot = ({ selectedExperience }: any) => (
+  <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
+    <div className="text-center">
+      <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full flex items-center justify-center text-2xl">
+        🤖
+      </div>
+      <h3 className="text-xl font-bold text-white mb-2">Workplace Assistant</h3>
+      <p className="text-gray-300 text-sm">
+        Currently viewing: Experience #{selectedExperience + 1}
+      </p>
+    </div>
+  </div>
+);
 
 const experiences = [
   {
@@ -107,101 +117,57 @@ const experiences = [
 
 export default function ExperienceSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [selectedExperience, setSelectedExperience] = useState(0);
-  const [hoveredAchievement, setHoveredAchievement] = useState<number | null>(
-    null
-  );
-  const [coords, setCoords] = useState<{ x: number; y: number } | null>(null);
+  const [hoveredAchievement, setHoveredAchievement] = useState(null);
+  const [coords, setCoords] = useState({ x: 800, y: 600 });
+  const [isInView, setIsInView] = useState(true);
 
   useEffect(() => {
+    // Set coordinates once component mounts
     setCoords({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
+      x: 800,
+      y: 600,
     });
   }, []);
 
-  if (!coords) return null;
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.3,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { x: -50, opacity: 0 },
-    visible: {
-      x: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const achievementVariants = {
-    hidden: { scale: 0, opacity: 0 },
-    visible: {
-      scale: 1,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15,
-      },
-    },
-  };
-
+  // Floating animation variants (simplified)
+  const floatingElements = [...Array(20)].map((_, i) => ({
+    id: i,
+    text: ["</>", "{}", "[]", "()", "fn()", "API", "DB", "UI"][
+      Math.floor(Math.random() * 8)
+    ],
+    x: Math.random() * coords.x,
+    y: Math.random() * coords.y,
+    delay: Math.random() * 5,
+  }));
 
   return (
-    <section id="experience" className="py-20 px-4 relative overflow-hidden">
+    <section
+      id="experience"
+      className="py-20 px-4 relative overflow-hidden min-h-screen bg-gray-900"
+    >
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-blue-900/10 to-purple-900/10"></div>
 
       {/* Floating Code Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute text-cyan-400/10 font-mono text-sm"
-            initial={{
-              x: Math.random() * coords.x,
-              y: Math.random() * coords.y,
-              opacity: 0,
-            }}
-            animate={{
-              y: [null, -100],
-              opacity: [0, 0.3, 0],
-            }}
-            transition={{
-              duration: Math.random() * 10 + 10,
-              repeat: Number.POSITIVE_INFINITY,
-              delay: Math.random() * 5,
+        {floatingElements.map((element) => (
+          <div
+            key={element.id}
+            className="absolute text-cyan-400/10 font-mono text-sm animate-pulse"
+            style={{
+              left: `${element.x}px`,
+              top: `${element.y}px`,
+              animationDelay: `${element.delay}s`,
             }}
           >
-            {
-              ["</>", "{}", "[]", "()", "fn()", "API", "DB", "UI"][
-                Math.floor(Math.random() * 8)
-              ]
-            }
-          </motion.div>
+            {element.text}
+          </div>
         ))}
       </div>
 
-      <motion.div
-        ref={ref}
-        variants={containerVariants}
-        initial="hidden"
-        animate={isInView ? "visible" : "hidden"}
-        className="max-w-7xl mx-auto relative z-10"
-      >
-        <motion.div variants={itemVariants} className="text-center mb-16">
+      <div ref={ref} className="max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
               Professional Journey
@@ -212,47 +178,38 @@ export default function ExperienceSection() {
             My career progression in full-stack development with measurable
             impact and continuous growth
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid lg:grid-cols-3 gap-8 items-start">
           {/* Workplace Bot */}
-          <motion.div
-            variants={itemVariants}
-            className="lg:col-span-1 order-2 lg:order-1"
-          >
+          <div className="lg:col-span-1 order-2 lg:order-1">
             <div className="lg:sticky lg:top-24">
               <WorkplaceBot selectedExperience={selectedExperience} />
             </div>
-          </motion.div>
+          </div>
 
           {/* Experience Timeline */}
-          <motion.div
-            variants={itemVariants}
-            className="lg:col-span-2 order-1 lg:order-2"
-          >
+          <div className="lg:col-span-2 order-1 lg:order-2">
             <div className="relative">
               {/* Timeline line */}
               <div className="absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-400 via-purple-500 to-pink-500 rounded-full"></div>
 
               <div className="space-y-8">
                 {experiences.map((exp, index) => (
-                  <motion.div
+                  <div
                     key={index}
-                    variants={itemVariants}
                     className="relative pl-20"
-                    onHoverStart={() => setSelectedExperience(index)}
+                    onMouseEnter={() => setSelectedExperience(index)}
                   >
                     {/* Timeline dot */}
-                    <motion.div
-                      whileHover={{ scale: 1.2 }}
-                      className={`absolute left-6 top-8 w-6 h-6 bg-gradient-to-r ${exp.companyColor} rounded-full border-4 border-gray-900 flex items-center justify-center text-white text-xs font-bold cursor-pointer`}
+                    <div
+                      className={`absolute left-6 top-8 w-6 h-6 bg-gradient-to-r ${exp.companyColor} rounded-full border-4 border-gray-900 flex items-center justify-center text-white text-xs font-bold cursor-pointer hover:scale-110 transition-transform`}
                     >
                       {exp.companyLogo}
-                    </motion.div>
+                    </div>
 
-                    <motion.div
-                      whileHover={{ scale: 1.02, x: 10 }}
-                      className={`bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 hover:border-cyan-400/50 transition-all duration-300 ${
+                    <div
+                      className={`bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 hover:border-cyan-400/50 transition-all duration-300 hover:scale-[1.02] hover:translate-x-2 ${
                         selectedExperience === index
                           ? "border-cyan-400/50 shadow-lg shadow-cyan-400/20"
                           : ""
@@ -290,16 +247,13 @@ export default function ExperienceSection() {
                       {/* Achievements Grid */}
                       <div className="grid gap-4">
                         {exp.achievements.map((achievement, achIndex) => (
-                          <motion.div
+                          <div
                             key={achIndex}
-                            variants={achievementVariants}
-                            initial="hidden"
-                            animate={isInView ? "visible" : "hidden"}
-                            transition={{ delay: achIndex * 0.1 }}
-                            whileHover={{ scale: 1.02, x: 5 }}
-                            onHoverStart={() => setHoveredAchievement(achIndex)}
-                            onHoverEnd={() => setHoveredAchievement(null)}
-                            className="group p-4 bg-gray-700/30 rounded-xl border border-gray-600 hover:border-cyan-400/50 transition-all duration-300 cursor-pointer"
+                            className="group p-4 bg-gray-700/30 rounded-xl border border-gray-600 hover:border-cyan-400/50 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:translate-x-1"
+                            onMouseEnter={() =>
+                              setHoveredAchievement(achIndex as any)
+                            }
+                            onMouseLeave={() => setHoveredAchievement(null)}
                           >
                             <div className="flex items-start space-x-4">
                               <div
@@ -311,33 +265,28 @@ export default function ExperienceSection() {
                                 <p className="text-gray-300 leading-relaxed group-hover:text-white transition-colors duration-200">
                                   {achievement.text}
                                 </p>
-                                <motion.div
-                                  initial={{ opacity: 0, y: 10 }}
-                                  animate={{
-                                    opacity:
-                                      hoveredAchievement === achIndex ? 1 : 0,
-                                    y: hoveredAchievement === achIndex ? 0 : 10,
-                                  }}
-                                  className={`mt-2 text-sm font-semibold ${achievement.color}`}
+                                <div
+                                  className={`mt-2 text-sm font-semibold ${
+                                    achievement.color
+                                  } transition-all duration-300 ${
+                                    hoveredAchievement === achIndex
+                                      ? "opacity-100 translate-y-0"
+                                      : "opacity-0 translate-y-2"
+                                  }`}
                                 >
                                   💡 {achievement.impact}
-                                </motion.div>
+                                </div>
                               </div>
                             </div>
 
                             {/* Hover glow effect */}
-                            <motion.div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-400/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                          </motion.div>
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-400/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                          </div>
                         ))}
                       </div>
 
                       {/* Stats Summary */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="mt-6 pt-6 border-t border-gray-600"
-                      >
+                      <div className="mt-6 pt-6 border-t border-gray-600">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div className="text-center">
                             <div
@@ -372,15 +321,15 @@ export default function ExperienceSection() {
                             <div className="text-xs text-gray-400">Status</div>
                           </div>
                         </div>
-                      </motion.div>
-                    </motion.div>
-                  </motion.div>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
